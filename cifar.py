@@ -41,7 +41,7 @@ from torchvision import datasets
 from torchvision import transforms
 
 from albumentations import AugMix, Compose
-from albumentations.pytorch import ToTensorV2
+from albumentations.pytorch import ToTensor
 
 
 parser = argparse.ArgumentParser(
@@ -196,7 +196,7 @@ class AugMixDataset(torch.utils.data.Dataset):
         AugMix(alpha=3, width=3, depth=4, posterize_bits=(3, 4), angle=9, threshold=77,
                shear_x=0.09, shear_y=0.09, translate_x=0.09, translate_y=0.09,
                mean=[0.5] * 3, std=[0.5] * 3),
-        ToTensorV2()
+        ToTensor()
     ])
 
   def __getitem__(self, i):
