@@ -40,6 +40,10 @@ import torch.nn.functional as F
 from torchvision import datasets
 from torchvision import transforms
 
+from albumentations import AugMix, Compose
+from albumentations.pytorch import ToTensorV2
+
+
 parser = argparse.ArgumentParser(
     description='Trains a CIFAR Classifier',
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -188,14 +192,21 @@ class AugMixDataset(torch.utils.data.Dataset):
     self.dataset = dataset
     self.preprocess = preprocess
     self.no_jsd = no_jsd
+    self.aug = Compose([
+        AugMix(alpha=3, width=3, depth=4, posterize_bits=(3, 4), angle=9, threshold=77,
+               shear_x=0.09, shear_y=0.09, translate_x=0.09, translate_y=0.09,
+               mean=[0.5] * 3, std=[0.5] * 3),
+        ToTensorV2()
+    ])
 
   def __getitem__(self, i):
     x, y = self.dataset[i]
     if self.no_jsd:
       return aug(x, self.preprocess), y
     else:
-      im_tuple = (self.preprocess(x), aug(x, self.preprocess),
-                  aug(x, self.preprocess))
+      im_tuple = (self.preprocess(x),
+                  self.aug(image=np.asarray(x))['image'],
+                  self.aug(image=np.asarray(x))['image'])
       return im_tuple, y
 
   def __len__(self):
